@@ -224,3 +224,28 @@ img.profile_img {
     margin-left: 8px;
     margin-right: 15px;
 }
+svg.three_dot {
+    cursor: pointer;
+    border-radius: 50%;
+    height: 23px;
+    width: 23px;
+    padding: 5px;
+    box-sizing: content-box;
+    transition: .2s;
+}
+
+svg.three_dot:hover {
+    background: #ddd;
+}
+.dropdown .dropdown-toggle:after {
+    display: none;
+}
+
+.dropdown button {
+    background: none;
+    border: none;
+}
+.update_image{
+    max-width: 100%;
+    width: 100%;
+}

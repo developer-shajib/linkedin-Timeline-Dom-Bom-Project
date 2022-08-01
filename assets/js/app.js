@@ -2,6 +2,7 @@
 const linkdin_form = document.getElementById('linkdin_form');
 const msg = document.querySelector('.msg');
 const post_list = document.querySelector('.post_list');
+const edit_form = document.getElementById('edit_form');
 
 //get all post
 const getAllPost = ()=>{
@@ -22,9 +23,17 @@ const getAllPost = ()=>{
               <span>12hr.</span>
               </div>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="currentColor" class="mercado-match" width="24" height="24" focusable="false">
-              <path d="M14 12a2 2 0 11-2-2 2 2 0 012 2zM4 10a2 2 0 102 2 2 2 0 00-2-2zm16 0a2 2 0 102 2 2 2 0 00-2-2z"></path>
-            </svg>
+            <div class="dropdown">
+            <button class="dropdown-toggle" data-bs-toggle="dropdown">
+              <svg class="three_dot" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="currentColor" class="mercado-match" width="24" height="24" focusable="false">
+            <path d="M14 12a2 2 0 11-2-2 2 2 0 012 2zM4 10a2 2 0 102 2 2 2 0 00-2-2zm16 0a2 2 0 102 2 2 2 0 00-2-2z"></path>
+          </svg>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item edit_btn" post_id="${data.id}" data-bs-toggle="modal" data-bs-target="#edit_modal"">Edit</a></li>
+              <li><a class="dropdown-item delete_btn" post_id="${data.id}" href="#">Delete</a></li>
+            </ul>
+          </div>
           </div>
           <div class="text_box">
             <p>${data.pcontent}</p>
@@ -62,14 +71,91 @@ linkdin_form.onsubmit=(e)=>{
     let form_data = new FormData(e.target);
     let {aname,aphoto,pcontent,pphoto} = Object.fromEntries(form_data.entries());
     let data = Object.fromEntries(form_data.entries());
+    const id = Math.floor(Math.random() * 10000)+'_'+Date.now();
 
     if(!aname || !aphoto || !pcontent || !pphoto){
         msg.innerHTML = setAlert('All feilds are required!');
         return false;
     }
     else{
-        createLSData('linkdingData',data);
+        createLSData('linkdingData',{...data,id});
         linkdin_form.reset();
         getAllPost();
     }
 };
+
+
+
+post_list.onclick=(e)=>{
+  e.preventDefault();
+  
+  //edit form 
+  if(e.target.classList.contains('edit_btn')){
+    //get data form LS
+    let data = readLSData('linkdingData');
+    let posts_id = e.target.getAttribute('post_id');
+
+    let { aname,aphoto,pcontent,pphoto,id } =  data.find(item => item.id == posts_id);
+
+    edit_form.innerHTML=`<div class="my-3">
+    <label for="">Auth Name</label>
+    <input name="aname" class="form-control" type="text" value="${aname}">
+  </div>
+  <div class="my-3">
+    <label for="">Auth photo</label>
+    <input name="aphoto" class="form-control" type="text" value="${aphoto}">
+  </div>
+  <div class="my-3">
+    <label for="">Post Content</label>
+    <input name="pcontent" class="form-control" type="text" value="${pcontent}">
+  </div>
+  <div class="my-3">
+    <input name="id" class="form-control" type="hidden" value="${id}">
+  </div>
+  <div class="my-3">
+    <label for="">Post Photo</label>
+    <input name="pphoto" class="form-control" type="text" value="${pphoto}">
+  </div>
+  <img class="update_image" src="${pphoto}" alt="">
+  <div class="my-3">
+    <input class="btn btn-primary w-100" type="submit" value="Update Post">
+  </div>`
+
+  }
+  else if(e.target.classList.contains('delete_btn')){
+    let confi = confirm('Do you Delete It?');
+        
+
+    if(confi==true){
+       const post_id = e.target.getAttribute('post_id');
+
+       // get all post to LS Data
+        const posts = readLSData('linkdingData');
+
+       let deleted_data = posts.filter(data => data.id !== post_id);
+
+       updateLSData('linkdingData',deleted_data)
+
+        getAllPost();
+    }
+    
+  }
+
+}
+
+//edit form submit
+edit_form.onsubmit=(e)=>{
+  e.preventDefault();
+  
+  let form_data = new FormData(e.target);
+  let {aname,aphoto,pcontent,pphoto,id} = Object.fromEntries(form_data.entries());
+
+  let all_data = readLSData('linkdingData');
+  
+  let edit_data = all_data.findIndex(data => data.id == id);
+  all_data[edit_data] = {aname,aphoto,pcontent,pphoto,id};
+
+  updateLSData('linkdingData',all_data);
+  getAllPost();
+
+}
